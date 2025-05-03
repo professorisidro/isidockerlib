@@ -23,16 +23,20 @@ A IsiDockerLib ao ser instanciada já reconhece o sistema operacional e, baseado
 A partir daí, basta usarmos os seguintes métodos:
 
 `listContainers()` - lista todos os contêineres em execução, exibindo
-	- memória consumida (em Mb)
-	- % de memória em relação ao sistema
-	- % de uso de CPU
+- memória consumida (em Mb)
+- % de memória em relação ao sistema
+- % de uso de CPU
 	
 `listAllImages()` - lista todas as imagens disponíveis
+
 `runContainer(params)` - executa um contêiner 
-	- `params` - todos os parâmetros para iniciar o contêiner (desde a imagem, porta, volumes, etc)
+	
+- `params` - todos os parâmetros para iniciar o contêiner (desde a imagem, porta, volumes, etc)
 	
 `stopContainer(container)` - para a execução de um Contêiner
+
 `removeContainer(container)` - remove o contêiner que acabou de ser parado
+
 `stopAndRemoveContainer(container)` - para a execução e remove o contêiner
 
 
