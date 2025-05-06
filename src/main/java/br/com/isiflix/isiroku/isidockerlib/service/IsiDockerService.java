@@ -7,31 +7,25 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.isiflix.isiroku.isidockerlib.comands.DockerComands;
 import br.com.isiflix.isiroku.isidockerlib.dto.ContainerData;
 import br.com.isiflix.isiroku.isidockerlib.dto.ContainerInfo;
 import br.com.isiflix.isiroku.isidockerlib.dto.ImageInfo;
+import br.com.isiflix.isiroku.isidockerlib.enums.ContainerHealthEnum;
 import br.com.isiflix.isiroku.isidockerlib.platform.OperatingSystem;
+import br.com.isiflix.isiroku.isidockerlib.resolver.DockerPathResolver;
 
 public class IsiDockerService {
 
 	private static String DOCKER_PATH="";
-	public static final String LIST_RUNNING_CONTAINERS = "stats --no-stream --format \"{{.ID}}\\t{{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}\\t{{.MemPerc}}\"";
-	public static final String LIST_ALL_CONTAINERS = "ps -a ";
-	public static final String LIST_ALL_IMAGES = "image ls --format \"{{.Repository}}\\t{{.Tag}}\\t{{.ID}}\\t{{.Size}}\"";
-	public static final String START_CONTAINER = "run";
-	public static final String STOP_CONTAINER = "stop";
-	public static final String REMOVE_CONTAINER = "rm";
-	public static final String REMOVE_IMAGE = "image rm";
-	
-	
+
 	public IsiDockerService() {
-		// TODO - Identificar o sistema operacional e o caminho onde o DOCKER está instalado
-		DOCKER_PATH = locateDockerBinary();
-		System.out.println(DOCKER_PATH);
+		DOCKER_PATH = DockerPathResolver.getDockerPath();
+		System.out.printf("Docker path resolved - Path: %s%n", DOCKER_PATH);
 	}
 
 	public List<ContainerInfo> listContainers() {
-		String dockerOutput = runDockerCommand(DOCKER_PATH +" "+ LIST_RUNNING_CONTAINERS);
+		String dockerOutput = runDockerCommand(DOCKER_PATH +" "+ DockerComands.LIST_RUNNING_CONTAINERS);
 		String lines[] = dockerOutput.split("\n");
 		List<ContainerInfo> containerInfo = new ArrayList<>();
 		for (String result : lines) {
@@ -45,7 +39,7 @@ public class IsiDockerService {
 	}
 
 	public List<ImageInfo> listAllImages() {
-		String dockerOtput = runDockerCommand(DOCKER_PATH + " "+ LIST_ALL_IMAGES);
+		String dockerOtput = runDockerCommand(DOCKER_PATH + " "+ DockerComands.LIST_ALL_IMAGES);
 		String lines[] = dockerOtput.split("\n");
 		List<ImageInfo> imageInfo = new ArrayList<>();
 		for (String result : lines) {
@@ -58,20 +52,27 @@ public class IsiDockerService {
 	}
 
 	public ContainerData runContainer(String params) {
-		String outpString = runDockerCommand(DOCKER_PATH+" "+START_CONTAINER + " " + params);
+		String outpString = runDockerCommand(DOCKER_PATH+" "+ DockerComands.START_CONTAINER + " " + params);
 		return new ContainerData(outpString);
 	}
 
 	public ContainerData stopContainer(String container) {
 		System.out.println("Stopping Container " + container);
-		String output = runDockerCommand(DOCKER_PATH+" "+STOP_CONTAINER + " " + container);
+		String output = runDockerCommand(DOCKER_PATH+" "+ DockerComands.STOP_CONTAINER + " " + container);
 		return new ContainerData(output);
 	}
 
 	public ContainerData removeContainer(String container) {
-		String output = runDockerCommand(DOCKER_PATH+" "+REMOVE_CONTAINER + " " + container);
+		String output = runDockerCommand(DOCKER_PATH+" "+ DockerComands.REMOVE_CONTAINER + " " + container);
 		return new ContainerData(output);
 	}
+
+	public ContainerHealthEnum GetContainerHealthy(String container) {
+		String output = runDockerCommand(DOCKER_PATH+" " + String.format(DockerComands.GET_CONTAINER_HEALTH, container));
+		output = output.replace("\n", "");
+		return ContainerHealthEnum.from(output);
+	}
+
 
 	public ContainerData stopAndRemoveContainer(String container) {
 		ContainerData data = stopContainer(container);
@@ -88,7 +89,6 @@ public class IsiDockerService {
 			StringBuilder output = new StringBuilder();
 			String line;
 			while ((line = reader.readLine()) != null) {
-				System.out.println("DEBUG = "+line);
 				output.append(line).append("\n");
 			}
 			int exitCode = process.waitFor();
@@ -102,26 +102,5 @@ public class IsiDockerService {
 			ex.printStackTrace();
 			throw new RuntimeException("Erro ao executar " + command);
 		}
-	}
-	
-	private String locateDockerBinary() {
-		List<String> commonPaths = OperatingSystem.isLinux() || OperatingSystem.isMac() ?
-				 List.of(
-					"/opt/homebrew/bin/docker",
-				    "/usr/bin/docker",
-			        "/usr/local/bin/docker",
-			        "/bin/docker"
-				 ): 
-			     List.of(
-			        "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe",
-			        "C:\\ProgramData\\DockerDesktop\\version-bin\\docker.exe"	 
-			     );
-		
-		for (String path: commonPaths) {
-			if (Files.isExecutable(Paths.get(path))){
-				return path;
-			}
-		}
-		throw new RuntimeException("Docker command not found");
 	}
 }
