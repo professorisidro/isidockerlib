@@ -9,6 +9,7 @@ import java.util.List;
 
 import br.com.isiflix.isiroku.isidockerlib.dto.ContainerData;
 import br.com.isiflix.isiroku.isidockerlib.dto.ContainerInfo;
+import br.com.isiflix.isiroku.isidockerlib.dto.ImageData;
 import br.com.isiflix.isiroku.isidockerlib.dto.ImageInfo;
 import br.com.isiflix.isiroku.isidockerlib.platform.OperatingSystem;
 
@@ -77,6 +78,11 @@ public class IsiDockerService {
 		ContainerData data = stopContainer(container);
 		data = removeContainer(container);
 		return data;
+	}
+	
+	public ImageData removeImage(String image) {
+		String imageData = runDockerCommand(DOCKER_PATH+" "+REMOVE_IMAGE+ " "+image);
+		return new ImageData(imageData);
 	}
 
 	public String runDockerCommand(String command) {

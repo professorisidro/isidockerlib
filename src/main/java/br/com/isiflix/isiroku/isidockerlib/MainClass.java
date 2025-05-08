@@ -12,7 +12,7 @@ public class MainClass {
 		IsiDockerService dockerService = new IsiDockerService();
 		
 		
-		String params = "-d -it --name meuMysql -e MYSQL_ROOT_PASSWORD=12345 -p3310:3306 mysql:8.4";
+		//String params = "-d -it --name meuMysql -e MYSQL_ROOT_PASSWORD=12345 -p3310:3306 mysql:8.4";
 //		System.out.println(dockerService.runContainer(params));
 		
 		System.out.println(dockerService.listContainers());
