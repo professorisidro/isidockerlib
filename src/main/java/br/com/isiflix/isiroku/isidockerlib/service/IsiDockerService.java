@@ -52,7 +52,7 @@ public class IsiDockerService {
 		for (String result : lines) {
 			if (!result.isBlank() && !result.isEmpty()) {
 				String resultFields[] = result.split("\t");
-				imageInfo.add(new ImageInfo(resultFields[0], resultFields[1], resultFields[2], resultFields[3]));
+					imageInfo.add(new ImageInfo(resultFields[0], resultFields[1], resultFields[2], resultFields[3]));
 			}
 		}
 		return imageInfo;
