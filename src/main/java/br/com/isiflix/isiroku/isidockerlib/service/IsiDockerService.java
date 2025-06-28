@@ -7,10 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.isiflix.isiroku.isidockerlib.dto.ContainerData;
-import br.com.isiflix.isiroku.isidockerlib.dto.ContainerInfo;
-import br.com.isiflix.isiroku.isidockerlib.dto.ImageData;
-import br.com.isiflix.isiroku.isidockerlib.dto.ImageInfo;
+import br.com.isiflix.isiroku.isidockerlib.dto.*;
 import br.com.isiflix.isiroku.isidockerlib.platform.OperatingSystem;
 
 public class IsiDockerService {
@@ -23,6 +20,7 @@ public class IsiDockerService {
 	public static final String STOP_CONTAINER = "stop";
 	public static final String REMOVE_CONTAINER = "rm";
 	public static final String REMOVE_IMAGE = "image rm";
+	public static final String LOG_CONTAINER = "logs";
 	
 	
 	public IsiDockerService() {
@@ -54,7 +52,7 @@ public class IsiDockerService {
 			if (!result.isBlank() && !result.isEmpty()) {
 				result = result.replaceAll("\"", "");
 				String resultFields[] = result.split("\t");
-				imageInfo.add(new ImageInfo(resultFields[0], resultFields[1], resultFields[2], resultFields[3]));
+					imageInfo.add(new ImageInfo(resultFields[0], resultFields[1], resultFields[2], resultFields[3]));
 			}
 		}
 		System.out.println(imageInfo);
@@ -77,6 +75,20 @@ public class IsiDockerService {
 		return new ContainerData(output);
 	}
 
+	public ContainerLogs getContainerLogs(String containerId) {
+		String output = runDockerCommand(DOCKER_PATH + " " + LOG_CONTAINER + " " + containerId);
+		if (output.toLowerCase().contains("no such container")) {
+			throw new IllegalArgumentException("Container Não encontrado");
+		}
+
+		return new ContainerLogs(
+				containerId,
+				output,
+				System.currentTimeMillis()
+		);
+	}
+
+
 	public ContainerData stopAndRemoveContainer(String container) {
 		ContainerData data = stopContainer(container);
 		data = removeContainer(container);
@@ -97,7 +109,6 @@ public class IsiDockerService {
 			StringBuilder output = new StringBuilder();
 			String line;
 			while ((line = reader.readLine()) != null) {
-				//System.out.println("DEBUG = "+line);
 				output.append(line).append("\n");
 			}
 			int exitCode = process.waitFor();
