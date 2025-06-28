@@ -28,7 +28,7 @@ public class IsiDockerService {
 	public IsiDockerService() {
 		// TODO - Identificar o sistema operacional e o caminho onde o DOCKER está instalado
 		DOCKER_PATH = locateDockerBinary();
-		System.out.println(DOCKER_PATH);
+//		System.out.println(DOCKER_PATH);
 	}
 
 	public List<ContainerInfo> listContainers() {
@@ -37,6 +37,7 @@ public class IsiDockerService {
 		List<ContainerInfo> containerInfo = new ArrayList<>();
 		for (String result : lines) {
 			if (!result.isBlank() && !result.isEmpty()) {
+				result = result.replaceAll("\"", "");
 				String resultFields[] = result.split("\t");
 				containerInfo.add(new ContainerInfo(resultFields[0], resultFields[1], resultFields[2], resultFields[3],
 						resultFields[4]));
@@ -51,10 +52,12 @@ public class IsiDockerService {
 		List<ImageInfo> imageInfo = new ArrayList<>();
 		for (String result : lines) {
 			if (!result.isBlank() && !result.isEmpty()) {
+				result = result.replaceAll("\"", "");
 				String resultFields[] = result.split("\t");
 				imageInfo.add(new ImageInfo(resultFields[0], resultFields[1], resultFields[2], resultFields[3]));
 			}
 		}
+		System.out.println(imageInfo);
 		return imageInfo;
 	}
 
@@ -94,7 +97,7 @@ public class IsiDockerService {
 			StringBuilder output = new StringBuilder();
 			String line;
 			while ((line = reader.readLine()) != null) {
-				System.out.println("DEBUG = "+line);
+				//System.out.println("DEBUG = "+line);
 				output.append(line).append("\n");
 			}
 			int exitCode = process.waitFor();
@@ -104,7 +107,7 @@ public class IsiDockerService {
 //			}
 			return output.toString();
 		} catch (Exception ex) {
-			System.out.println(ex.getMessage());
+			//System.out.println(ex.getMessage());
 			ex.printStackTrace();
 			throw new RuntimeException("Erro ao executar " + command);
 		}
